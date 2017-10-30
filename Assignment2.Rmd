@@ -1,0 +1,209 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+##delete the comma within numbers
+movie$Adjusted_Gross2 <- as.numeric(gsub(",", "", as.character(movie$Adjusted_Gross)))
+factor(movie$Adjusted_Gross2)
+
+```
+```{r}
+cor(movie$IMDb_Rating, movie$MovieLens_Rating, method = "pearson")
+
+```
+
+```{r}
+#What's the relationship between rating and adjusted gross revenues? 
+p = ggplot(data=movie, aes(x=IMDb_Rating, y=Adjusted_Gross2, color=Genre))
+
+p+geom_point(aes(x=IMDb_Rating),alpha=1/5)+
+  xlab("IMDb Rating") + 
+  ylab("Adjusted Gorss Revenue")+
+  geom_smooth(method="lm",fill=NA)+
+  labs(title = "Relationship Between IMDb Rating and Adjusted Gorss Revenue", size=80) 
+```
+
+```{r}
+# omit the outlier? 
+p = ggplot(data=movie, aes(x=IMDb_Rating, y=Adjusted_Gross2))
+
+p+geom_point(aes(x=IMDb_Rating),alpha=1/5)+
+  xlab("IMDb Rating") + 
+  ylab("Adjusted Gorss Revenue")+
+  geom_smooth(method="lm",fill=NA)+
+  labs(title = "Relationship Between IMDb Rating and Adjusted Gorss Revenue", size=80) + 
+  ylim(0,4000)
+
+```
+```{r}
+cor(movie$IMDb_Rating, movie$Adjusted_Gross2, method = "pearson")
+```
+
+```{r}
+p = ggplot(data=movie, aes(x=Runtime_min, y=Adjusted_Gross2, color=Genre))
+
+p+geom_point(aes(x=Runtime_min),alpha=1/5)+
+  xlab("Rruntime_min ") + 
+  ylab("Adjusted Gorss Revenue")+
+  geom_smooth(method="lm",fill=NA)+
+  labs(title = "Relationship Between Runtime_min and Adjusted Gorss Revenue", size=80) 
+```
+```{r}
+require(plyr)
+func <- function(movie)
+{
+return(data.frame(COR = cor(movie$Runtime_min, movie$Adjusted_Gross2)))
+}
+
+time_n_revenue = ddply(movie, .(Genre), func)
+```
+
+```{r}
+str(movie$Profit)
+movie$Profit_num=as.numeric(as.character(movie$Profit))
+
+p = ggplot(data=movie, aes(x=Runtime_min, y=Profit_num))
+
+p+geom_point(aes(x=Runtime_min),alpha=1/5)+
+  xlab("Runtime(min)") + 
+  ylab("Profit")+
+  geom_smooth(method="lm",fill=NA)+
+  labs(title = "Relationship Between Runtime(min) and Profit", size=80) 
+```
+
+```{r}
+str(movie$Profit)
+movie$Profit_num=as.numeric(as.character(movie$Profit))
+p = ggplot(data=movie, aes(x=Runtime_min, y=Profit_num, color=Genre))
+
+p+geom_point(aes(x=Runtime_min),alpha=1/5)+
+  xlab("Runtime_min") + 
+  ylab("Profit")+
+  geom_smooth(method="lm",fill=NA)+
+  labs(title = "Relationship Between Runtime_min and Profit", size=80) 
+```
+
+```{r}
+cor(movie$Runtime_min, movie$Profit_num, method='pearson')
+```
+
+```{r}
+library(plyr)
+require(plyr)
+func <- function(movie)
+{
+return(data.frame(COR = cor(movie$Runtime_min, movie$Profit_num)))
+}
+
+time_n_profit=ddply(movie, .(Genre), func)
+time_n_profit
+```
+
+```{r}
+# runtime and rating
+
+p = ggplot(data=movie, aes(x=Runtime_min, y=IMDb_Rating, color=Genre))
+
+p+geom_point(aes(x=Runtime_min),alpha=1/5)+
+  xlab("Runtime_min") + 
+  ylab("IMDb_Rating")+
+  geom_smooth(method="lm",fill=NA)+
+  labs(title = "Relationship Between Runtime(min) and IMDb Rating", size=80)
+```
+
+```{r}
+require(plyr)
+func <- function(movie)
+{
+return(data.frame(COR = cor(movie$Runtime_min, movie$IMDb_Rating)))
+}
+
+time_n_rating=ddply(movie, .(Genre), func)
+time_n_rating
+```
+
+```{r}
+## put the cor tables together
+genre_name = time_n_revenue[,1]
+time_revenue = time_n_revenue[,2]
+time_rating = time_n_rating[,2]
+time_profit = time_n_profit[,2]
+correlation = cbind.data.frame(genre_name, time_revenue, time_rating, time_profit)
+write.csv(correlation, file = "Runtime.csv")
+```
+
+```{r}
+cor(movie$Adjusted_Gross2, movie$Profit_num)
+```
+
+
+```{r}
+# us and oversea
+str(movie$Overseas_rev)
+movie$Overseas_rev_num=as.numeric(as.character(movie$Overseas_rev))
+
+str(movie$US_rev)
+movie$US_rev_num=as.numeric(as.character(movie$US_rev))
+
+cor(movie$Overseas_rev_num, movie$US_rev_num)
+```
+```{r}
+q = ggplot(data= movie, aes(x=movie$US_rev_num, y=movie$Overseas_rev_num))
+q + geom_point(aes(x=movie$US_rev_num), alpha=1/5) +
+ xlab("US Revenue") + 
+  ylab("Overseas Revenue")+
+  geom_smooth(method="lm",fill=NA)+
+  labs(title = "Relationship Between US Revenue and Overseas Revenue", size=80)
+```
+
+```{r}
+q + geom_point(aes(x=movie$US_rev_num), alpha=1/5) +
+ xlab("US Revenue") + 
+  ylab("Overseas Revenue")+
+  geom_smooth(method="lm",fill=NA)+
+  labs(title = "Relationship Between US Revenue and Overseas Revenue", size=80) +
+  xlim(0,200)+
+  ylim(0,500)
+```
+
+
+```{r}
+q + geom_point(aes(x=movie$US_rev_num), alpha=1/5) +
+ xlab("US Revenue") + 
+  ylab("Overseas Revenue")+
+  geom_smooth(method="lm",fill=NA)+
+  labs(title = "Relationship Between US Revenue and Overseas Revenue", size=80) +
+  xlim(0,200) +
+  ylim(0,1000)
+```
+
+
+```{r}
+
+```
+```{r}
+levels = c(-Inf,200,800)
+labels = c("low","high")
+
+library(data.table)
+setDT(movie)[, grp := cut(US_rev_num, levels, labels)]
+#cls %>%
+  #mutate(movie$grp=cut(movie$US_rev_num,levels,labels=labels))
+
+q = ggplot(data= movie, aes(x=movie$US_rev_num, y=movie$Overseas_rev_num,color=grp))
+q + geom_point(aes(x=movie$US_rev_num), alpha=1/5) +
+ xlab("US Revenue") + 
+  ylab("Overseas Revenue")+
+  geom_smooth(method="lm",fill=NA)+
+  labs(title = "Relationship Between US Revenue and Overseas Revenue", size=80)
+```
+```{r}
+cor(movie[movie$grp=="low"]$US_rev_num, movie[movie$grp=="low"]$Overseas_rev_num)
+```
+
+```{r}
+cor(movie[movie$grp=="high"]$US_rev_num, movie[movie$grp=="high"]$Overseas_rev_num)
+```
+
