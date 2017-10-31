@@ -17,14 +17,11 @@ p+geom_point(aes(x=movie$US_rev), alpha=1/5)+xlab("US Revenue")+ylab("Overseas R
   geom_smooth(method="loess",fill='red')+
   labs(title = "Relationship Between US Revenue and Overseas Revenue", size=80)
 
-#find good cutoff points
-install.packages("OptimalCutpoints")
-install.packages("data.table")
-
 #determine the cutoff point based on the positive/negative slopes of the curve drawn before
 levels = c(0,100,Inf)
 labels = c("negative","positive")
 
+install.packages("data.table")
 setDT(movie)[, grp := cut(US_rev, levels, labels)]
 #cls %>%
 #mutate(movie$grp=cut(movie$US_rev_num,levels,labels=labels))
@@ -38,5 +35,13 @@ q + geom_point(aes(x=movie$US_rev), alpha=1/10) +
 
 cor(movie[movie$grp=="negative"]$US_rev, movie[movie$grp=="negative"]$Overseas_rev)
 cor(movie[movie$grp=="positive"]$US_rev, movie[movie$grp=="positive"]$Overseas_rev)
+
+#average difference between US vs Overseas revenue based on Genre
+US_movie_genre <- aggregate(movie$US_rev,by = list(Genre=movie$Genre), FUN = mean)
+Overseas_movie_genre <- aggregate(movie$Overseas_rev,by = list(Genre=movie$Genre), FUN = mean)
+Overseas_minus_US_diff<-Overseas_movie_genre$x-US_movie_genre$x
+Overseas_minus_US<-rbind(US_movie_genre$Genre,Overseas_minus_US_diff)
+barplot(Overseas_minus_US_diff,main = 'Revenue in US and Overseas', xlab ='Genre',ylab='Revenue Difference', col = c('lightblue2','lightcoral'), legend=c('US Revenue','Overseas Revenue'))
+
 
 
