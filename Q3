@@ -1,0 +1,42 @@
+#BAX431 Group HW Q3
+
+#US vs Overseas revenue
+movie<-read.csv('movie')
+summary(movie)
+# check if the class of Overseas and US revenue are numeric
+class(movie$Overseas_rev)
+class(movie$US_rev)
+# find if these two variables are not, or moderate, or highly correlated
+cor(movie$Overseas_rev, movie$US_rev, method='pearson')
+
+#create scatter plot
+install.packages("ggplot2")
+p<-ggplot(data= movie, aes(x=movie$US_rev, y=movie$Overseas_rev))
+#fix overplotting issue, draw curve instead of linear line to find the relationship between these two variables
+p+geom_point(aes(x=movie$US_rev), alpha=1/5)+xlab("US Revenue")+ylab("Overseas Revenue")+
+  geom_smooth(method="loess",fill='red')+
+  labs(title = "Relationship Between US Revenue and Overseas Revenue", size=80)
+
+#find good cutoff points
+install.packages("OptimalCutpoints")
+install.packages("data.table")
+
+#determine the cutoff point based on the positive/negative slopes of the curve drawn before
+levels = c(0,100,Inf)
+labels = c("negative","positive")
+
+setDT(movie)[, grp := cut(US_rev, levels, labels)]
+#cls %>%
+#mutate(movie$grp=cut(movie$US_rev_num,levels,labels=labels))
+
+q <- ggplot(data= movie, aes(x=movie$US_rev, y=movie$Overseas_rev,color=grp))
+q + geom_point(aes(x=movie$US_rev), alpha=1/10) +
+  xlab("US Revenue") + 
+  ylab("Overseas Revenue")+
+  geom_smooth(method="loess",fill=NA)+
+  labs(title = "Relationship Between US Revenue and Overseas Revenue", size=80)
+
+cor(movie[movie$grp=="negative"]$US_rev, movie[movie$grp=="negative"]$Overseas_rev)
+cor(movie[movie$grp=="positive"]$US_rev, movie[movie$grp=="positive"]$Overseas_rev)
+
+
