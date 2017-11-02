@@ -207,3 +207,35 @@ cor(movie[movie$grp=="low"]$US_rev_num, movie[movie$grp=="low"]$Overseas_rev_num
 cor(movie[movie$grp=="high"]$US_rev_num, movie[movie$grp=="high"]$Overseas_rev_num)
 ```
 
+
+
+```{r}
+## Q2
+library(plyr)
+movie$type= revalue(movie$Genre,
+                    c("action"=1,"adventure"=1,"comedy"=1,"crime"=1,"drama"=1,"fantasy"=1,"horror"=1,"musical"=1,"sci-fi"=1,"documentary"=2,"romance"=2,"animation"=3,"biography"=3,"mystery"=3,"thriller"=3))
+
+```
+
+
+```{r}
+geren_num = sqldf("select Genre, count(*) as genre_size from movie group by Genre order by Genre")
+
+genre_name = time_n_revenue[,1]
+genre_size = geren_num[,1]
+time_rating = time_n_rating[,2]
+time_profit = time_n_profit[,2]
+correlation_2 = cbind.data.frame(genre_name,genre_size , time_rating, time_profit)
+```
+
+
+```{r}
+p = ggplot(data=correlation_2,aes(x=time_profit, y=time_rating, color=genre_name, size=genre_size))
+
+p+geom_point() +
+  xlab("Runtime & Profit Coefficient") + 
+  ylab("Runtime & Rating Coefficient") 
+  #labs(title = "Relationship Between US Revenue and Overseas Revenue", size=60)
+  
+```
+
