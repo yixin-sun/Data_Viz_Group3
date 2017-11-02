@@ -42,6 +42,32 @@ is.na(movie$Adjusted_Gross2)
 movie[!complete.cases(movie),]
 # IMDb_Rating does not have any NA's
 
+# make a correlation matrix
+movie_subset_correlations <- read.csv("movie.csv")
+movie_subset_correlations$Adjusted_Gross2 <- as.numeric(gsub(",", "", as.character(movie_subset_correlations$Adjusted_Gross)))
+movie_subset_correlations$Profit2 <- as.numeric(gsub(",", "", as.character(movie_subset_correlations$Profit)))
+movie_subset_correlations$MovieLens_Rating2 <- as.numeric(gsub(",", "", as.character(movie_subset_correlations$MovieLens_Rating)))
+movie_subset_correlations$IMDb_Ratings2 <- as.numeric(gsub(",", "", as.character(movie_subset_correlations$IMDb_Rating)))
+movie_subset_correlations$Day_of_Week <- NULL
+movie_subset_correlations$Director <- NULL
+movie_subset_correlations$Genre <- NULL
+movie_subset_correlations$Movie_Title <- NULL
+movie_subset_correlations$Release_Date <- NULL
+movie_subset_correlations$Studio <- NULL
+movie_subset_correlations$Budget <- NULL
+movie_subset_correlations$Gross_rev <- NULL
+movie_subset_correlations$Overseas_Perc <- NULL
+movie_subset_correlations$Profit_perc <- NULL
+movie_subset_correlations$US_perc <- NULL
+movie_subset_correlations$Adjusted_Gross <- NULL
+movie_subset_correlations$Profit <- NULL
+movie_subset_correlations$IMDb_Rating <- NULL
+movie_subset_correlations$MovieLens_Rating <- NULL
+movie_subset_correlations$Overseas_rev <- NULL
+movie_subset_correlations$US_rev <- NULL
+movie_subset_correlations$Runtime_min <- NULL
+round(cor(movie_subset_correlations),2)
+
 # Find the correlation between IMDB ratings and MovieLens ratings
 cor(movie$MovieLens_Rating, movie$IMDb_Rating)
 "There is a very strong relationship between MovieLens ratings and IMDB ratings. This can be
@@ -51,8 +77,6 @@ the small sample size is not representative of the 'true' quality of the movie. 
 so highly correlated, we will simplify our process to evaluating the relationship between just
 one of the rating metrics so that we avoid multicollinearity and a needlessly complex model."
 
-# Find the correlation between Revenue and Profit
-cor(movie$Adjusted_Gross2, movie$Profit2)
 "There is not as strong of a relationship between Adjusted Gross Revenue and Profit as there
 is between the two movie rating scores. On one hand this makes sense because one could have a 
 highly profitable movie that did not make much money, as long as the production costs are low. 
@@ -67,12 +91,8 @@ in addition to revenue, since there could be hidden trends. While revenue alone 
 metric for how successful movies are measured, having high revenue movies will low profit margins
 is not nearly as impressive as making highly profitable movies."
 
-
-# Find the correlation between rating and adjusted gross revenue / profit
-cor(movie$Adjusted_Gross2, movie$IMDb_Rating)
-cor(movie$Profit2, movie$IMDb_Rating)
-"This correlation is relatively low for both. In order to get a more hollistic understanding of 
-why this is the case, we should plot these variables on a scatter plot."
+"The correlation between rating and AGR/Profit is relatively low for both. In order to get a more
+hollistic understanding of why this is the case, we should plot these variables on a scatter plot."
 
 #########################
 ## Revenue scatterplot ##
@@ -208,7 +228,7 @@ movie will be most impacted by viewer scores."
 ggplot(data = movie, aes(x = Adjusted_Gross2, y = IMDb_Rating, fill = Genre)) +
   geom_point() +
   geom_smooth(method = lm) + 
-  facet_grid(Genre~. , )
+  facet_grid(Genre~.,)
 "it's too crowded, so we're going to take the correlation coefficient for each genre, put it into a dataframe,
 and then plot that."
 
@@ -352,67 +372,7 @@ order to rake in as much profit as possible.
 Another interesting trend was that only a handful of genres saw negative relationships between Profit and
 Rating, and those were Documentary (small sample size), Romance, and Thriller (very low relationship). 
 Since Romance is the only one that is negative, it implies that the worse the movie is perceived, the 
-better is performs in terms of profit."
+better is performs in terms of profit.
 
-##################
-### Question 2 ###
-##################
-### Shall we make a short movie or a long movie? ###
-"In order to decide whether we should make a short or long movie, we should define
-what the difference between short and long movies are. First, we should look at the 
-data to see the distribution of movie durations to try and bucket these."
-# We know that runtime is clean because of previous tests
-
-# Plot it as a histogram to see distribution
-ggplot(data = movie, aes(x = Runtime_min)) +
-  geom_histogram(binwidth = 10)
-average_runtime <- mean(movie$Runtime_min)
-median_runtime <- median(movie$Runtime_min)
-"at this point, we should probably remove outliers, but first identify them through the empirical test."
-
-
-"Looks approximately normally distributed at first glance. 
-Mean and median are basically equal at just under 2 hours.
-Let us arbitrarily assume that there are actually 3 buckets 
-for movie lengths:
-long: greater than mean plus 1 SD
-medium: between +- 1 SD away from mean 
-short: less than mean minus 1 SD "
-
-
-
-mean_plus_sd <- average_runtime + sd(movie$Runtime_min)
-mean_minus_sd <- average_runtime - sd(movie$Runtime_min)
-
-movie_length_vector <- with(movie, movie$movie_length_bucket <- 
-                              ifelse(movie$Runtime_min >= mean_plus_sd, "Long",
-                              ifelse(movie$Runtime_min <= mean_minus_sd, "Short", "Medium")))
-movie["movie_length_bucket"] <- movie_length_vector
-
-ggplot(data = movie, aes(x = movie_length_bucket, y = Profit)) +
-  geom_col()
-
-
-"based on Yixin's correlation matrix, there are 3 types of movie genres."
-
-
-
-##################
-### Question 3 ###
-##################
-### If a movie does well in US, does it also usually do well overseas? ###
-movie$Adjusted_Gross2 <- as.numeric(gsub(",", "", as.character(movie$Overseas_rev)))
-cor(movie$US_rev, movie$Overseas_rev)
-
-
-
-##################
-### Question 4 ###
-##################
-### Now you have explored many variables and how they affect revenue, 
-### please recommend a strategy for Netflix’s next investment in a movie.
-"what are the metrics that we should analyze for this?
-Netflix doesn't necessarily want to increase their revenue. They want to increase profit.
-we should look at studio, genre, "
-
-"How can we present this? can we present this as a skit? "# team-viz
+This is impacted by whether a movie has multiple genres. Most movies are a combination of genres, and this
+data set does not take that into account."
