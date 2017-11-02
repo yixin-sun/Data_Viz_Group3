@@ -1,3 +1,6 @@
+#431 Data Visualization Group HW Q3
+#Is a movie does well in the U.S. also does well overseas?
+
 movie<-read.csv('movie')
 summary(movie)
 # check if the class of Overseas and US revenue are numeric
