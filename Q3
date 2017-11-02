@@ -34,39 +34,55 @@ q + geom_point(aes(x=movie$US_rev), alpha=1/10) +
 round(cor(movie[movie$grp=="negative"]$US_rev, movie[movie$grp=="negative"]$Overseas_rev),digits=3)
 round(cor(movie[movie$grp=="positive"]$US_rev, movie[movie$grp=="positive"]$Overseas_rev),digits=3)
 
-#Find 5 Genres with the top average US Revenue
-movie_by_genre1 <- aggregate(movie$US_rev,by = list(Genre=movie$Genre), FUN = mean)
-movie_by_genre1
-ggplot(data = movie_by_genre1, aes(x = Genre, y =round(x) )) + geom_bar(stat = "sum",fill="lightblue") +
-  theme(plot.title = element_text(hjust = 0.5))+ggtitle('Average US Revenue by Genre in $million')+ 
-  xlab("Genre")+ylab("Average US Revenue")+
-  geom_text(aes(label=round(x)), position=position_dodge(width=0.9), vjust=-0.25)+
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
-  
-#Find 5 Genres with the top average Overseas Revenue
-movie_by_genre2 <- aggregate(movie$Overseas_rev,by = list(Genre=movie$Genre), FUN = mean)
-movie_by_genre2
-ggplot(data = movie_by_genre2, aes(x = Genre, y = x)) + geom_bar(stat = "sum",fill="lightcoral") +
-  theme(plot.title = element_text(hjust = 0.5))+ggtitle('Average Overseas Revenue by Genre in $million')+ 
-  xlab("Genre")+ylab("Average Overseas Revenue in")+
-  geom_text(aes(label=round(x)), position=position_dodge(width=0.9), vjust=-0.25)+
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+#scatter plot with the average US and Overseas revenue, color=genre
+avg_rev_US_genre <- aggregate(movie$US_rev,by = list(Genre=movie$Genre), FUN = mean)
+avg_rev_OV_genre <- aggregate(movie$Overseas_rev,by = list(Genre=movie$Genre), FUN = mean)
+avg_budget_genre<-aggregate(movie$Overseas_rev,by = list(Genre=movie$Genre), FUN = mean)
+avg_rev_genre1<-merge.data.frame(avg_rev_US_genre,avg_rev_OV_genre,by='Genre')
+avg_rev_genre2<-merge.data.frame(avg_rev_genre1,avg_budget_genre,by='Genre')
+avg_rev_genre2
 
-#Find 10 Studios with the top average US Revenue
-movie_by_studio1 <- aggregate(movie$US_rev,by = list(Studios=movie$Studio), FUN = mean)
-movie_by_studio1
-ggplot(data =movie_by_studio1, aes(x = Studios, y = x)) + geom_bar(stat = "sum",fill="lightgreen") +
-  theme(plot.title = element_text(hjust = 0.5))+
-  ggtitle('Average US Revenue by Studios in $million')+ xlab("Studios")+
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))+ylab("Average US Revenue")+
-  geom_text(aes(label=round(x)), position=position_dodge(width=0.9), vjust=-0.25)
-  
-#Find 10 Studios with the top average Overseas Revenue
-movie_by_studio2 <- aggregate(movie$Overseas_rev,by = list(Studios=movie$Studio), FUN = mean)
-movie_by_studio2
-ggplot(data =movie_by_studio2, aes(x = Studios, y = x)) + geom_bar(stat = "sum",fill="khaki1") +
-  theme(plot.title = element_text(hjust = 0.5))+
-  ggtitle('Average Oversea Revenue by Studios in $million')+ xlab("Studios")+
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))+ylab("Average US Revenue in $million")+
-  geom_text(aes(label=round(x)), position=position_dodge(width=0.9), vjust=-0.25)
+ggplot(data=avg_rev_genre2, aes(x=x.x, y=x.y,colour=Genre,size=x))+
+  geom_point()+theme(plot.title = element_text(hjust = 0.5))+
+  xlab("Average US Revenue in $million") + ylab("Average Overseas Revenue in $million")+
+  labs(title = "US Revenue vs Overseas Revenue by Genre", size=80)+
+  geom_hline(yintercept=round(mean(avg_rev_OV_genre$x)),colour='blue')+
+  geom_vline(xintercept=round(mean(avg_rev_US_genre$x)),colour='blue')
+
+#scatter plot with the average US and Overseas revenue, color=studios
+avg_rev_US_studio <- aggregate(movie$US_rev,by = list(Studios=movie$Studio), FUN = mean)
+avg_rev_OV_studio <- aggregate(movie$Overseas_rev,by = list(Studios=movie$Studio), FUN = mean)
+avg_budget_studio<-aggregate(movie$Overseas_rev,by = list(Studios=movie$Studio), FUN = mean)
+avg_rev_studio1<-merge.data.frame(avg_rev_US_studio,avg_rev_OV_studio, by='Studios')
+avg_rev_studio2<-merge.data.frame(avg_rev_studio1,avg_budget_studio,by='Studios')
+avg_rev_studio2
+
+ggplot(data=avg_rev_studio2, aes(x=x.x, y=x.y,colour=Studios,size=x))+
+  geom_point()+theme(plot.title = element_text(hjust = 0.5))+
+  xlab("Average US Revenue in $million") + ylab("Average Overseas Revenue in $million")+
+  labs(title = "US Revenue vs Overseas Revenue by Studios", size=80)+
+  geom_hline(yintercept=round(mean(avg_rev_OV_studio$x)),colour='blue')+
+  geom_vline(xintercept=round(mean(avg_rev_US_studio$x)),colour='blue')
+
+#explore the average IMDB ratings of the studios with high US revenue&low Overseas revenue
+high_us_low_overseas<-subset(avg_rev_studio2,x.x>150 & x.y<200)
+avg_rating_US_studio <- aggregate(movie$IMDb_Rating,by = list(Studios=movie$Studio), FUN = (mean))
+
+#IFC, Orion
+IMDB_rating1<-subset(avg_rating_US_studio,Studios %in% c('IFC','Orion'))
+ggplot(data =IMDB_rating1,aes(x =Studios,y=x))+geom_bar(stat="identity",fill="lightblue")+
+  theme(plot.title = element_text(hjust = 0.5))+ylab("IMDB Rating")+
+  labs(title = "IMDB Ratings of High US&Low Oveseas Revenue by Studio")+
+  geom_hline(yintercept=round(mean(IMDB_rating2$x)),colour='blue')
+
+#explore the average IMDB ratings of the studios with low US revenue&high Overseas revenue
+low_us_high_overseas<-subset(avg_rev_studio2,x.x<150 & x.y>mean(avg_rev_OV_studio$x))
+low_us_high_overseas
+
+#Gramercy Pictures,MGM,Path_Distribution,Screen Gems,Sony,Weinstein Company
+IMDB_rating2<-subset(avg_rating_US_studio,Studios %in% c('Gramercy Pictures','MGM','Path_Distribution','Screen Gems','Sony','Weinstein Company'))
+ggplot(data =IMDB_rating2,aes(x =Studios,y=x))+geom_bar(stat="identity",fill="lightcoral")+
+  theme(plot.title = element_text(hjust = 0.5))+ylab("IMDB Rating")+
+  labs(title = "IMDB Ratings of Low US&High Oveseas Revenue by Studio")+
+  geom_hline(yintercept=round(mean(IMDB_rating2$x)),colour='blue')
 
