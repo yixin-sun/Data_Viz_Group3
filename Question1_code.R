@@ -147,7 +147,11 @@ ggplot(data = Removed_outliers, aes(x = Adjusted_Gross2, y = IMDb_Rating)) +
 cor(log(movie$Adjusted_Gross2), movie$IMDb_Rating)
 ggplot(data = movie, aes(x = log(Adjusted_Gross2), y = IMDb_Rating)) +
   geom_point() + 
-  geom_smooth(method = lm)
+  geom_smooth(method = lm) +
+  xlab("Log of Adjusted Gross Revenue") + 
+  ylab("IMDB Ratings") +
+  ggtitle("Trendline of IMDB Ratings and Log of Adjusted Gross Revenue")
+
 
 ########################
 ## Profit scatterplot ##
@@ -206,7 +210,11 @@ ggplot(data = Removed_outliers, aes(x = Profit2, y = IMDb_Rating)) +
 cor(log(movie$Profit2), movie$IMDb_Rating)
 ggplot(data = movie, aes(x = log(Profit2), y = IMDb_Rating)) +
   geom_point() + 
-  geom_smooth(method = lm)
+  geom_smooth(method = lm) +
+  xlab("Log of Profit") + 
+  ylab("IMDB Ratings") +
+  ggtitle("Trendline of IMDB Ratings and Log of Profit")
+
 
 
 
